@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "@/app/actions/auth";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: "⊞" },
@@ -12,7 +13,7 @@ const navItems = [
   { label: "Profile", href: "/profile", icon: "👤" },
 ];
 
-export default function AppSidebar() {
+export default function AppSidebar({ userEmail }: { userEmail?: string }) {
   const pathname = usePathname();
 
   return (
@@ -46,7 +47,23 @@ export default function AppSidebar() {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-gray-800">
+      <div className="px-3 py-4 border-t border-gray-800 flex flex-col gap-1">
+        {userEmail && (
+          <div className="px-3 py-2 mb-1">
+            <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+          </div>
+        )}
+
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-500 hover:text-red-400 hover:bg-gray-800 transition-colors text-left"
+          >
+            <span className="text-base w-5 text-center" aria-hidden="true">↩</span>
+            Sign Out
+          </button>
+        </form>
+
         <Link
           href="/"
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition-colors"

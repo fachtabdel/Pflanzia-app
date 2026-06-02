@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import Hero from "@/components/ui/aero-hero-2";
 
 export const metadata: Metadata = {
   title: "Pflanzia — AI Plant Identification & Care",
@@ -75,48 +76,7 @@ export default function HomePage() {
       <main className="bg-gray-950 text-white flex-1">
 
         {/* Hero */}
-        <section className="relative overflow-hidden px-4 py-24 sm:py-32 sm:px-6 lg:px-8">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(34,197,94,0.12),transparent_60%)] pointer-events-none" />
-          <div className="relative mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-green-800 bg-green-900/30 px-4 py-1.5 text-sm text-green-400 mb-6">
-              <span aria-hidden="true">🌿</span> AI-powered plant identification
-            </div>
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight mb-6 leading-tight">
-              Identify Any Plant{" "}
-              <span className="text-green-400">in Seconds</span>
-            </h1>
-            <p className="text-gray-400 text-lg sm:text-xl max-w-xl mx-auto mb-10 leading-relaxed">
-              Upload a photo and let AI tell you exactly what plant it is, how to care for
-              it, and whether it&apos;s safe for your pets.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/sign-up"
-                className="rounded-2xl bg-green-600 px-7 py-3.5 text-base font-semibold text-white hover:bg-green-500 transition-colors shadow-lg shadow-green-900/30"
-              >
-                Try It Free
-              </Link>
-              <Link
-                href="/how-it-works"
-                className="rounded-2xl border border-gray-700 px-7 py-3.5 text-base font-semibold text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
-              >
-                See How It Works
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats */}
-        <section className="border-y border-gray-800 bg-gray-900/40 px-4 py-10 sm:px-6">
-          <div className="mx-auto max-w-4xl grid grid-cols-3 gap-8 text-center">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-3xl font-bold text-white">{stat.value}</p>
-                <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <Hero />
 
         {/* Features */}
         <section className="px-4 py-20 sm:px-6 lg:px-8">

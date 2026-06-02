@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { signUp } from "@/app/actions/auth";
+import { SubmitButton } from "@/components/ui/SubmitButton";
+import { GoogleSignInButton } from "@/components/ui/GoogleSignInButton";
 
 export const metadata: Metadata = {
   title: "Sign Up — Pflanzia",
 };
 
-export default function SignUpPage() {
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; message?: string }>;
+}) {
+  const params = await searchParams;
+
   return (
     <div className="w-full max-w-sm">
       <div className="text-center mb-8">
@@ -16,13 +25,7 @@ export default function SignUpPage() {
       <div className="rounded-2xl border border-gray-800 bg-gray-900 p-8 flex flex-col gap-5">
         {/* OAuth buttons */}
         <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            className="flex items-center justify-center gap-3 w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-          >
-            <span aria-hidden="true">G</span>
-            Continue with Google
-          </button>
+          <GoogleSignInButton />
           <button
             type="button"
             className="flex items-center justify-center gap-3 w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
@@ -39,7 +42,7 @@ export default function SignUpPage() {
         </div>
 
         {/* Registration form */}
-        <form className="flex flex-col gap-4">
+        <form action={signUp} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="name" className="text-sm font-medium text-gray-300">
               Full name
@@ -120,12 +123,21 @@ export default function SignUpPage() {
             </label>
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-500 transition-colors mt-1"
-          >
+          {params.error && (
+            <p className="text-sm text-red-400 bg-red-950/40 border border-red-900/50 rounded-xl px-4 py-3">
+              {params.error}
+            </p>
+          )}
+
+          {params.message && (
+            <p className="text-sm text-green-400 bg-green-950/40 border border-green-900/50 rounded-xl px-4 py-3">
+              {params.message}
+            </p>
+          )}
+
+          <SubmitButton className="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-500 transition-colors mt-1">
             Create Account
-          </button>
+          </SubmitButton>
         </form>
       </div>
 
