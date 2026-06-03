@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient();
+  const sessionId = formData.get("session_id") as string | null;
 
   const { error } = await supabase.auth.signInWithPassword({
     email: formData.get("email") as string,
@@ -12,7 +13,12 @@ export async function signIn(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/sign-in?error=${encodeURIComponent(error.message)}`);
+    const base = sessionId ? `/sign-in?session_id=${sessionId}&error=` : "/sign-in?error=";
+    redirect(`${base}${encodeURIComponent(error.message)}`);
+  }
+
+  if (sessionId) {
+    redirect(`/checkout/success?session_id=${sessionId}`);
   }
 
   redirect("/dashboard");
@@ -20,6 +26,7 @@ export async function signIn(formData: FormData) {
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
+  const sessionId = formData.get("session_id") as string | null;
 
   const { error } = await supabase.auth.signUp({
     email: formData.get("email") as string,
@@ -27,7 +34,12 @@ export async function signUp(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/sign-up?error=${encodeURIComponent(error.message)}`);
+    const base = sessionId ? `/sign-up?session_id=${sessionId}&error=` : "/sign-up?error=";
+    redirect(`${base}${encodeURIComponent(error.message)}`);
+  }
+
+  if (sessionId) {
+    redirect(`/checkout/success?session_id=${sessionId}`);
   }
 
   redirect("/dashboard");

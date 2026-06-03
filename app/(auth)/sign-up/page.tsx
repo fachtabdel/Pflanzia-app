@@ -11,15 +11,25 @@ export const metadata: Metadata = {
 export default async function SignUpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ error?: string; message?: string; session_id?: string; email?: string }>;
 }) {
   const params = await searchParams;
+  const { session_id, email: prefillEmail } = params;
 
   return (
     <div className="w-full max-w-sm">
+      {session_id && (
+        <div className="mb-6 rounded-xl bg-green-950/50 border border-green-800 px-4 py-3 text-center">
+          <p className="text-green-400 font-semibold text-sm">Pro subscription ready!</p>
+          <p className="text-green-300/70 text-xs mt-0.5">Create your account to activate Pro features</p>
+        </div>
+      )}
+
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-white">Create your account</h1>
-        <p className="mt-1 text-gray-500 text-sm">Start identifying plants for free</p>
+        <p className="mt-1 text-gray-500 text-sm">
+          {session_id ? "Activate your Pro subscription" : "Start identifying plants for free"}
+        </p>
       </div>
 
       <div className="rounded-2xl border border-gray-800 bg-gray-900 p-8 flex flex-col gap-5">
@@ -43,6 +53,8 @@ export default async function SignUpPage({
 
         {/* Registration form */}
         <form action={signUp} className="flex flex-col gap-4">
+          {session_id && <input type="hidden" name="session_id" value={session_id} />}
+
           <div className="flex flex-col gap-1.5">
             <label htmlFor="name" className="text-sm font-medium text-gray-300">
               Full name
@@ -68,6 +80,7 @@ export default async function SignUpPage({
               type="email"
               autoComplete="email"
               required
+              defaultValue={prefillEmail ?? ""}
               placeholder="you@example.com"
               className="rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-sm text-white placeholder-gray-600 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
             />
@@ -136,14 +149,17 @@ export default async function SignUpPage({
           )}
 
           <SubmitButton className="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-500 transition-colors mt-1">
-            Create Account
+            {session_id ? "Create Account & Activate Pro" : "Create Account"}
           </SubmitButton>
         </form>
       </div>
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Already have an account?{" "}
-        <Link href="/sign-in" className="text-green-400 hover:text-green-300 font-medium transition-colors">
+        <Link
+          href={session_id ? `/sign-in?session_id=${session_id}` : "/sign-in"}
+          className="text-green-400 hover:text-green-300 font-medium transition-colors"
+        >
           Sign in
         </Link>
       </p>

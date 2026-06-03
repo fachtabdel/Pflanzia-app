@@ -1,15 +1,27 @@
 import Link from "next/link";
 import PageHeader from "@/components/ui/PageHeader";
+import { createClient } from "@/lib/supabase/server";
 
 // Mock user data — replace with Supabase Auth user once connected
 const mockUser = {
   name: "Jane Smith",
   email: "jane@example.com",
   joinedAt: "2026-01-15T00:00:00Z",
-  plan: "Free",
 };
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: subscription } = user
+    ? await supabase
+        .from("subscriptions")
+        .select("plan, billing_period, status, current_period_end")
+        .eq("user_id", user.id)
+        .maybeSingle()
+    : { data: null };
+
+  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
   return (
     <div className="px-4 py-10 sm:px-8 max-w-2xl mx-auto">
       <PageHeader title="Profile & Settings" />
@@ -91,15 +103,47 @@ export default function ProfilePage() {
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Subscription</h2>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-white font-semibold">{mockUser.plan} Plan</p>
-            <p className="text-gray-500 text-sm">10 identifications / month</p>
+            <p className="text-white font-semibold flex items-center gap-2">
+              {isPro ? "Pro Plan" : "Free Plan"}
+              {isPro && (
+                <span className="rounded-full bg-green-600 px-2 py-0.5 text-xs font-semibold text-white">Active</span>
+              )}
+            </p>
+            {isPro ? (
+              <>
+                <p className="text-gray-500 text-sm capitalize">
+                  {subscription.billing_period} billing
+                </p>
+                {subscription.current_period_end && (
+                  <p className="text-gray-600 text-xs mt-0.5">
+                    Renews{" "}
+                    {new Date(subscription.current_period_end).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-gray-500 text-sm">10 identifications / month</p>
+            )}
           </div>
-          <Link
-            href="/pricing"
-            className="rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
-          >
-            Upgrade to Pro
-          </Link>
+          {isPro ? (
+            <p className="text-gray-500 text-xs text-right max-w-[140px]">
+              To cancel,{" "}
+              <Link href="/contact" className="text-green-400 hover:text-green-300 underline">
+                contact support
+              </Link>
+            </p>
+          ) : (
+            <Link
+              href="/pricing"
+              className="rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
+            >
+              Upgrade to Pro
+            </Link>
+          )}
         </div>
       </section>
 

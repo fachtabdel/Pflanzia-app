@@ -1,16 +1,14 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Pricing — Pflanzia",
-  description:
-    "Simple, transparent pricing for Pflanzia. Start free and upgrade to Pro for unlimited plant identifications and advanced features.",
-};
+import Link from "next/link";
+import { useState } from "react";
 
 const plans = [
   {
     name: "Free",
     price: { monthly: "$0", yearly: "$0" },
+    period: { monthly: "/mo", yearly: "/mo" },
+    badge: null,
     description: "Perfect for casual plant lovers.",
     cta: "Get Started Free",
     href: "/sign-up",
@@ -27,6 +25,8 @@ const plans = [
   {
     name: "Pro",
     price: { monthly: "$9", yearly: "$7" },
+    period: { monthly: "/mo", yearly: "/mo billed annually" },
+    badge: "Save 22%",
     description: "For serious plant enthusiasts.",
     cta: "Start Pro Trial",
     href: "/sign-up?plan=pro",
@@ -72,6 +72,31 @@ const faqItems = [
 ];
 
 export default function PricingPage() {
+  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
+  const [loading, setLoading] = useState(false);
+
+  async function handleProUpgrade() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ billingPeriod: billing }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Checkout error:", data.error);
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="text-white">
       {/* Hero */}
@@ -81,6 +106,33 @@ export default function PricingPage() {
           <p className="text-gray-400 text-lg">
             Start free. Upgrade when you need more.
           </p>
+
+          {/* Billing toggle */}
+          <div className="mt-8 inline-flex items-center gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
+            <button
+              onClick={() => setBilling("monthly")}
+              className={`rounded-lg px-5 py-2 text-sm font-medium transition-colors ${
+                billing === "monthly"
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBilling("yearly")}
+              className={`flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium transition-colors ${
+                billing === "yearly"
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              Annual
+              <span className="rounded-full bg-green-600 px-2 py-0.5 text-xs font-semibold text-white">
+                Save 22%
+              </span>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -105,24 +157,39 @@ export default function PricingPage() {
                 <p className="text-white font-bold text-2xl mb-1">{plan.name}</p>
                 <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
                 <p className="text-4xl font-bold text-white">
-                  {plan.price.monthly}
-                  <span className="text-gray-500 text-base font-normal">/mo</span>
+                  {plan.price[billing]}
+                  <span className="text-gray-500 text-base font-normal">
+                    {plan.period[billing]}
+                  </span>
                 </p>
-                {plan.highlighted && (
-                  <p className="text-green-400 text-xs mt-1">or {plan.price.yearly}/mo billed annually</p>
+                {plan.highlighted && billing === "yearly" && (
+                  <p className="text-green-400 text-xs mt-1">
+                    That&apos;s ${parseInt(plan.price.yearly.replace("$","")) * 12}/yr — 2 months free
+                  </p>
+                )}
+                {plan.highlighted && billing === "monthly" && (
+                  <p className="text-gray-500 text-xs mt-1">
+                    Switch to annual and save 22%
+                  </p>
                 )}
               </div>
 
-              <Link
-                href={plan.href}
-                className={`w-full rounded-xl py-3 text-sm font-semibold text-center mb-8 transition-colors ${
-                  plan.highlighted
-                    ? "bg-green-600 text-white hover:bg-green-500"
-                    : "border border-gray-600 text-gray-300 hover:border-gray-400 hover:text-white"
-                }`}
-              >
-                {plan.cta}
-              </Link>
+              {plan.name === "Pro" ? (
+                <button
+                  onClick={handleProUpgrade}
+                  disabled={loading}
+                  className="w-full rounded-xl py-3 text-sm font-semibold text-center mb-8 transition-colors bg-green-600 text-white hover:bg-green-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Redirecting…" : plan.cta}
+                </button>
+              ) : (
+                <Link
+                  href={plan.href}
+                  className="w-full rounded-xl py-3 text-sm font-semibold text-center mb-8 transition-colors border border-gray-600 text-gray-300 hover:border-gray-400 hover:text-white"
+                >
+                  {plan.cta}
+                </Link>
+              )}
 
               <ul className="space-y-3 flex-1">
                 {plan.features.map((f) => (

@@ -11,12 +11,20 @@ export const metadata: Metadata = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ error?: string; message?: string; session_id?: string }>;
 }) {
   const params = await searchParams;
+  const { session_id } = params;
 
   return (
     <div className="w-full max-w-sm">
+      {session_id && (
+        <div className="mb-6 rounded-xl bg-green-950/50 border border-green-800 px-4 py-3 text-center">
+          <p className="text-green-400 font-semibold text-sm">Pro subscription ready!</p>
+          <p className="text-green-300/70 text-xs mt-0.5">Sign in to activate your Pro features</p>
+        </div>
+      )}
+
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-white">Welcome back</h1>
         <p className="mt-1 text-gray-500 text-sm">Sign in to your Pflanzia account</p>
@@ -43,6 +51,8 @@ export default async function SignInPage({
 
         {/* Email/password form */}
         <form action={signIn} className="flex flex-col gap-4">
+          {session_id && <input type="hidden" name="session_id" value={session_id} />}
+
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-sm font-medium text-gray-300">
               Email
@@ -113,7 +123,10 @@ export default async function SignInPage({
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Don&apos;t have an account?{" "}
-        <Link href="/sign-up" className="text-green-400 hover:text-green-300 font-medium transition-colors">
+        <Link
+          href={session_id ? `/sign-up?session_id=${session_id}` : "/sign-up"}
+          className="text-green-400 hover:text-green-300 font-medium transition-colors"
+        >
           Sign up free
         </Link>
       </p>
