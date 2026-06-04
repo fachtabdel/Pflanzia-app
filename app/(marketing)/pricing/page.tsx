@@ -74,9 +74,11 @@ const faqItems = [
 export default function PricingPage() {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   async function handleProUpgrade() {
     setLoading(true);
+    setCheckoutError(null);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -88,11 +90,11 @@ export default function PricingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error("Checkout error:", data.error);
+        setCheckoutError(data.error || "Something went wrong. Please try again.");
         setLoading(false);
       }
     } catch (err) {
-      console.error("Checkout error:", err);
+      setCheckoutError(err instanceof Error ? err.message : "Network error. Please try again.");
       setLoading(false);
     }
   }
@@ -175,13 +177,22 @@ export default function PricingPage() {
               </div>
 
               {plan.name === "Pro" ? (
-                <button
-                  onClick={handleProUpgrade}
-                  disabled={loading}
-                  className="w-full rounded-xl py-3 text-sm font-semibold text-center mb-8 transition-colors bg-green-600 text-white hover:bg-green-500 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Redirecting…" : plan.cta}
-                </button>
+                <>
+                  <button
+                    onClick={handleProUpgrade}
+                    disabled={loading}
+                    className="w-full rounded-xl py-3 text-sm font-semibold text-center mb-2 transition-colors bg-green-600 text-white hover:bg-green-500 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {loading && (
+                      <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    )}
+                    {loading ? "Redirecting to checkout…" : plan.cta}
+                  </button>
+                  {checkoutError && (
+                    <p className="text-red-400 text-xs text-center mb-6 px-1">{checkoutError}</p>
+                  )}
+                  {!checkoutError && <div className="mb-8" />}
+                </>
               ) : (
                 <Link
                   href={plan.href}
